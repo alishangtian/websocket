@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WebSocket</title>
+<script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link href="staticfile/user.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<div style="height: 30px">
+		<div style="margin-left: 450px" id="diauser"></div>
+	</div>
+	<div>
+		<div id="users"
+			style="float: left; width: 260px; height: 500px; border: solid #999 1px; margin-left: 80px">
+		</div>
+		<div style="float: left; margin-left: 80px">
+			<div>
+				<div id="diolage"
+					style="width: 604px; height: 380px; border: solid #999 1px; overflow-x: auto; overflow-y: auto"></div>
+			</div>
+			<div style="height: 10px"></div>
+			<div>
+				<textarea id="inputdiolage"
+					style="width: 600px; height: 85px; resize: none"></textarea>
+			</div>
+			<div id="operate">
+				<div style="margin-left: 494px">
+					<input type="button" onclick="send()" value="send"><input
+						type="button" onclick="connect()" value="connect"><input
+						type="button" onclick="close()" value="close">
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var webSocket, data = {}, sid, id;
+		$(function() {
+			setInterval("refreshUser()", 10000);
+		})
+		function initServer(ws) {
+			webSocket = new WebSocket(ws);
+			webSocket.onerror = function(event) {
+				onError(event);
+			};
+			webSocket.onopen = function(event) {
+				onOpen(event);
+			};
+			webSocket.onmessage = function(event) {
+				onMessage(event);
+			};
+			webSocket.onclose = function(event) {
+				onClose(event);
+			};
+			function onMessage(event) {
+				if (event.data) {
+					var jsonData = $.parseJSON(event.data);
+					var status = jsonData.status;
+					var data = jsonData.data;
+					switch (status) {
+					case 0:
+						parseAllUser(data);
+						break;
+					case 1:
+						id = data;
+						break;
+					case 2:
+						var desId = jsonData.desId;
+						sid = desId;
+						$("#diolage").append(sid + "：" + data + "<br />");
+						$("#diauser").html(sid + "《《-------------》》" + "我");
+						break;
+					case 3:
+						$("#diolage").append("系统通知 ：" + data + "<br />");
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			function onOpen(event) {
+				$("#diolage").append("Connection established!<br />");
+				$("input[value=connect]").hide();
+			}
+			function onError(event) {
+				webSocket.send("error");
+			}
+			function onClose(event) {
+				webSocket.send("close");
+			}
+		}
+		function send() {
+			$("#diolage").append("我:" + $("#inputdiolage").val() + "<br />");
+			webSocket.send("2," + sid + "," + $("#inputdiolage").val());
+			$("#inputdiolage").val("");
+		}
+		function connect() {
+			initServer("ws://127.0.0.1/echo");
+		}
+		function close() {
+			webSocket.close(1000, "已经关闭了");
+		}
+		function refreshUser() {
+			if (webSocket) {
+				webSocket.send("1,");
+			}
+		}
+		function parseAllUser(users) {
+			var html = "";
+			$(users)
+					.each(
+							function(index, value) {
+								if (value != id) {
+									var sessIdDiv = "<div class=\"user\" sid=\""
+											+ value
+											+ "\" style=\"width:50%;height:30px;border:solid 1px #777;margin:2px;\">"
+											+ value + "</div>";
+									html += sessIdDiv;
+								}
+							})
+			$("#users").html(html);
+		}
+		$(".user").live("click", function() {
+			var $this = $(this);
+			sid = $this.attr("sid");
+			$this.css("background-color", "#222");
+			$this.siblings("div.user").css("background-color", "#777");
+			$("#diauser").html(sid + "《《-------------》》" + "我");
+		})
+	</script>
+</body>
+</html>
