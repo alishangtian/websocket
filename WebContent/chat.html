@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>WebSocket</title>
 <script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -34,24 +35,35 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		var webSocket, data = {}, sid, id;
+		var webSocket, data = {}, sid, id, timer;
 		$(function() {
-			setInterval("refreshUser()", 10000);
+			timer = setInterval("refreshUser()", 10000);
 		})
 		function initServer(ws) {
 			webSocket = new WebSocket(ws);
 			webSocket.onerror = function(event) {
+				console.log("#################onerror event#################");
+				console.log(event);
 				onError(event);
 			};
 			webSocket.onopen = function(event) {
+				console.log("#################onopen event#################");
+				console.log(event);
 				onOpen(event);
 			};
 			webSocket.onmessage = function(event) {
+				console
+						.log("#################onmessage event#################");
+				console.log(event);
 				onMessage(event);
 			};
 			webSocket.onclose = function(event) {
+				console.log("#################onclose event#################");
+				console.log(event);
 				onClose(event);
 			};
+			console.log("#################webSocket object#################");
+			console.log(webSocket);
 			function onMessage(event) {
 				if (event.data) {
 					var jsonData = $.parseJSON(event.data);
@@ -67,11 +79,11 @@
 					case 2:
 						var desId = jsonData.desId;
 						sid = desId;
-						$("#diolage").append(sid + "£º" + data + "<br />");
-						$("#diauser").html(sid + "¡¶¡¶-------------¡·¡·" + "ÎÒ");
+						$("#diolage").append(sid + "ï¼š" + data + "<br />");
+						$("#diauser").html(sid + "ã€Šã€Š-------------ã€‹ã€‹" + "æˆ‘");
 						break;
 					case 3:
-						$("#diolage").append("ÏµÍ³Í¨Öª £º" + data + "<br />");
+						$("#diolage").append("ç³»ç»Ÿé€šçŸ¥ ï¼š" + data + "<br />");
 						break;
 					default:
 						break;
@@ -90,7 +102,7 @@
 			}
 		}
 		function send() {
-			$("#diolage").append("ÎÒ:" + $("#inputdiolage").val() + "<br />");
+			$("#diolage").append("æˆ‘:" + $("#inputdiolage").val() + "<br />");
 			webSocket.send("2," + sid + "," + $("#inputdiolage").val());
 			$("#inputdiolage").val("");
 		}
@@ -98,11 +110,15 @@
 			initServer("ws://127.0.0.1/echo");
 		}
 		function close() {
-			webSocket.close(1000, "ÒÑ¾­¹Ø±ÕÁË");
+			webSocket.close(1001, "æµè§ˆå™¨å…³é—­");//å…³é—­æ–¹æ³•æš‚æ—¶ä¸å¯ç”¨ï¼Œå¯ä»¥é€šè¿‡å…³é—­æµè§ˆå™¨æ¥å…³é—­
 		}
 		function refreshUser() {
 			if (webSocket) {
-				webSocket.send("1,");
+				if (webSocket.readyState != 2 && webSocket.readyState != 3) {
+					webSocket.send("1,");
+				} else {
+					clearInterval(timer);
+				}
 			}
 		}
 		function parseAllUser(users) {
@@ -125,7 +141,7 @@
 			sid = $this.attr("sid");
 			$this.css("background-color", "#222");
 			$this.siblings("div.user").css("background-color", "#777");
-			$("#diauser").html(sid + "¡¶¡¶-------------¡·¡·" + "ÎÒ");
+			$("#diauser").html(sid + "ã€Šã€Š-------------ã€‹ã€‹" + "æˆ‘");
 		})
 	</script>
 </body>

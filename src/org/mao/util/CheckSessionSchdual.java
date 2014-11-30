@@ -16,6 +16,16 @@ public class CheckSessionSchdual extends TimerTask {
 	@Override
 	public void run() {
 		List<String> dieIds = new ArrayList<String>();
+		/*if (session.keySet().size() > 2) {
+			for (String id : session.keySet()) {
+				try {
+					session.get(id).close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}*/
 		for (String id : session.keySet()) {
 			Session sess = session.get(id);
 			if (!sess.isOpen()) {
