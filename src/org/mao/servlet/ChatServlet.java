@@ -14,7 +14,7 @@ public class ChatServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		System.out.println(request.getContextPath());
-		request.getRequestDispatcher(request.getContextPath() + "/chat.html")
+		request.getRequestDispatcher("chat.html")
 				.forward(request, response);
 	}
 
